@@ -8,9 +8,9 @@
 #include <readline/history.h>
 
 #define clear() printf("\033[H\033[J");
-#define LSH_RL_BUFSIZE 1024
 #define LSH_TOK_BUFSIZE 64
 #define LSH_TOK_DELIM " \t\r\n\a"
+#define MAXLIST 100 // max number of commands to be supported
 
 //biult-in functions
 int lsh_cd(char **args);
@@ -44,7 +44,7 @@ int lsh_cd(char **args) {
         fprintf(stderr, "lsh: expected argument to \"cd\"\n");
     } else {
         if (chdir(args[1]) != 0) {
-            perror("lsh");
+            perror("cd error");
         }
     }
     return 1;
@@ -115,34 +115,18 @@ int cmnd_execute(char **args) {
     return sys_launch(args);
 }
 
-char **split_line(char *line){
-    int bufsize = LSH_TOK_BUFSIZE, position = 0;
-    char **tokens = malloc(bufsize * sizeof(char*));
-    char *token;
+// parse space str, put result in parsed
+void parseSpace(char* str, char** parsed) {
+	int i;
 
-    if (!tokens) {
-        fprintf(stderr, "lsh: allocation error\n");
-        exit(EXIT_FAILURE);
-    }
+	for (i = 0; i < MAXLIST; i++) {
+		parsed[i] = strsep(&str, " ");
 
-    token = strtok(line, LSH_TOK_DELIM);
-    while (token != NULL) {
-        tokens[position] = token;
-        position++;
-
-        if (position >= bufsize) {
-            bufsize += LSH_TOK_BUFSIZE;
-            tokens = realloc(tokens, bufsize * sizeof(char*));
-            if (!tokens) {
-                fprintf(stderr, "lsh: allocation error\n");
-                exit(EXIT_FAILURE);
-            }
-        }
-
-        token = strtok(NULL, LSH_TOK_DELIM);
-    }
-    tokens[position] = NULL;
-    return tokens;
+		if (parsed[i] == NULL)
+			break;
+		if (strlen(parsed[i]) == 0)
+			i--;
+	}
 }
 
 // print current directory
@@ -155,7 +139,7 @@ void printDir() {
 // command loop
 void shell_program(void) {
     char *line;
-    char **args;
+    char* args[MAXLIST];
     int status;
 
     do {
@@ -163,11 +147,9 @@ void shell_program(void) {
         line = readline("\n> ");
         if (line && *line)
             add_history(line);
-        args = split_line(line);
+        parseSpace(line, args);
         status = cmnd_execute(args);
 
-        //free(line);
-        free(args);
     } while (status);
 }
 
@@ -193,3 +175,4 @@ int main(int argc, char **argv) {
 gcc main.c -lreadline
 ./a.out 
 */
+
