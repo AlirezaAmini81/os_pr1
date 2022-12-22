@@ -14,14 +14,24 @@
 #define MAX_FILE_NAME 100
 
 //biult-in functions
+int lsh_fwl(char **args);
+int lsh_mr(char **args);
+int lsh_rs(char **args);
+int lsh_ncl(char **args);
 int lsh_lc(char **args);
+int lsh_ftl(char **args);
 int lsh_cd(char **args);
 int lsh_help(char **args);
 int lsh_exit(char **args);
 
 // List of builtin commands
 char *builtin_str[] = {
+    "fwl",
+    "mr",
+    "rs",
+    "ncl",
     "lc",
+    "ftl",
     "cd",
     "help",
     "exit"
@@ -29,7 +39,12 @@ char *builtin_str[] = {
 
 // List of builtin functions
 int (*builtin_func[]) (char **) = {
+    &lsh_fwl,
+    &lsh_mr,
+    &lsh_rs,
+    &lsh_ncl,
     &lsh_lc,
+    &lsh_ftl,
     &lsh_cd,
     &lsh_help,
     &lsh_exit
@@ -42,6 +57,27 @@ int lsh_num_builtins() {
 /*
   begin builtin function implementations
 */
+
+
+// A
+int lsh_fwl(char **args) {
+    return 1;
+}
+
+// B
+int lsh_mr(char **args) {
+    return 1;
+}
+
+// C
+int lsh_rs(char **args) {
+    return 1;
+}
+
+// D
+int lsh_ncl(char **args) {
+    return 1;
+}
 
 // F
 int lsh_lc(char **args) {
@@ -66,6 +102,11 @@ int lsh_lc(char **args) {
     fclose(fp);
     printf("File %s has %d lines.\n ", filename, count);
  
+    return 1;
+}
+
+// G
+int lsh_ftl(char **args) {
     return 1;
 }
 
