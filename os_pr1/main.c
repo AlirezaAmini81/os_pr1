@@ -13,17 +13,6 @@
 #define MAX_FILE_NAME 100
 #define MAX_LET 1000 // max number of letters in each line of file
 
-//biult-in functions
-int lsh_fwl(char **args);
-int lsh_mr(char **args);
-int lsh_rs(char **args);
-int lsh_ucl(char **args);
-int lsh_lc(char **args);
-int lsh_ftl(char **args);
-int lsh_cd(char **args);
-int lsh_help(char **args);
-int lsh_exit(char **args);
-
 // List of builtin commands
 char *builtin_str[] = {
     "fwl",
@@ -35,19 +24,6 @@ char *builtin_str[] = {
     "cd",
     "help",
     "exit"
-};
-
-// List of builtin functions
-int (*builtin_func[]) (char **) = {
-    &lsh_fwl,
-    &lsh_mr,
-    &lsh_rs,
-    &lsh_ucl,
-    &lsh_lc,
-    &lsh_ftl,
-    &lsh_cd,
-    &lsh_help,
-    &lsh_exit
 };
 
 int lsh_num_builtins() {
@@ -186,13 +162,21 @@ int lsh_help(char **args) {
     return 1;
 }
 
-int lsh_exit(char **args) {
-    return 0;
-}
-
 /*
   end builtin function implementations
 */
+
+// List of builtin functions
+int (*builtin_func[]) (char **) = {
+    &lsh_fwl,
+    &lsh_mr,
+    &lsh_rs,
+    &lsh_ucl,
+    &lsh_lc,
+    &lsh_ftl,
+    &lsh_cd,
+    &lsh_help
+};
 
 // lunch system command
 int sys_launch(char **args) {
@@ -220,6 +204,40 @@ int sys_launch(char **args) {
     return 1;
 }
 
+// lunch builtin command
+int builtin_launch(int i,char **args) {
+    pid_t pid, wpid;
+    int status;
+
+    if (strcmp(args[0],"exit") == 0){
+        return 0;
+    } else if (strcmp(args[0],"cd") == 0) {
+        return ((*builtin_func[6])(args));
+    }
+
+    // cd and exit should be handled //
+
+    pid = fork();
+
+    if (pid < 0){
+        // error forking
+        perror("\nFailed forking child..");
+    } else if (pid == 0) {
+        // Child process
+        if ((*builtin_func[i])(args) < 0) {
+            perror("Could not execute command... ");
+        }
+        exit(EXIT_FAILURE);
+    } else {
+        // Parent process
+        do {
+            wpid = waitpid(pid, &status, WUNTRACED);
+        } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+    }
+
+    return 1;
+}
+
 // execute command
 int cmnd_execute(char **args) {
     int i;
@@ -231,7 +249,7 @@ int cmnd_execute(char **args) {
 
     for (i = 0; i < lsh_num_builtins(); i++) {
         if (strcmp(args[0], builtin_str[i]) == 0) {
-            return (*builtin_func[i])(args);
+            return builtin_launch(i, args);
         }
     }
 
