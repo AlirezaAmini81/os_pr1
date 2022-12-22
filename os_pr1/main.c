@@ -17,7 +17,7 @@
 int lsh_fwl(char **args);
 int lsh_mr(char **args);
 int lsh_rs(char **args);
-int lsh_ncl(char **args);
+int lsh_ucl(char **args);
 int lsh_lc(char **args);
 int lsh_ftl(char **args);
 int lsh_cd(char **args);
@@ -29,7 +29,7 @@ char *builtin_str[] = {
     "fwl",
     "mr",
     "rs",
-    "ncl",
+    "ucl",
     "lc",
     "ftl",
     "cd",
@@ -42,7 +42,7 @@ int (*builtin_func[]) (char **) = {
     &lsh_fwl,
     &lsh_mr,
     &lsh_rs,
-    &lsh_ncl,
+    &lsh_ucl,
     &lsh_lc,
     &lsh_ftl,
     &lsh_cd,
@@ -74,17 +74,44 @@ int lsh_rs(char **args) {
 }
 
 // D
-int lsh_ncl(char **args) {
+int lsh_ucl(char **args) {
+    if (args[1] == NULL) {
+        fprintf(stderr, "expected argument to \"ucl\"\n");
+        return 1;
+    }
+
+    FILE *fp;
+    char c;
+    char line[MAX_LET];
+    char *filename = args[1];
+
+    fp = fopen(filename, "r");
+
+    if (fp  == NULL){
+        fprintf(stderr, "could not open file %s\n", filename);
+        return 1;
+    }
+
+    printf("Uncommented Lines of file %s:\n", filename);
+    while(fgets(line, MAX_LET, fp) != NULL)
+        if (line[0] != '#')
+            printf("%s", line);
+
+    fclose(fp);
+
     return 1;
 }
 
 // F
 int lsh_lc(char **args) {
+    if (args[1] == NULL) {
+        fprintf(stderr, "expected argument to \"lc\"\n");
+        return 1;
+    }
+
     FILE *fp;
     char c;
     int count = 0;
-    // the file should be either in current folder
-    // or complete path should be provided
     char *filename = args[1];
  
     fp = fopen(filename, "r");
@@ -99,6 +126,7 @@ int lsh_lc(char **args) {
             count++;
 
     fclose(fp);
+
     printf("File %s has %d lines.\n ", filename, count);
 
     return 1;
@@ -106,21 +134,27 @@ int lsh_lc(char **args) {
 
 // G
 int lsh_ftl(char **args) {
+    if (args[1] == NULL) {
+        fprintf(stderr, "expected argument to \"ftl\"\n");
+        return 1;
+    }
+
     FILE *fp;
     int count = 0;
     char line[MAX_LET];
     char *filename = args[1];
 
-    fp = fopen(args[1], "r");
+    fp = fopen(filename, "r");
 
     if (fp  == NULL){
         fprintf(stderr, "could not open file %s\n", filename);
         return 1;
     }
 
-    while(fgets(line, MAX_LET, fp) != EOF && count++ < 10) {
+    printf("First Ten Lines of file %s:\n", filename);
+
+    while(fgets(line, MAX_LET, fp) != NULL && count++ < 10)
         printf("%s", line);
-    }
 
     fclose(fp);
 
