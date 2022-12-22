@@ -61,12 +61,40 @@ int lsh_num_builtins() {
 
 // A
 int lsh_fwl(char **args) {
+    char buf[512];
+    FILE *f = fopen(args, "r");
+    if (f == NULL)
+    {
+        printf("Error! opening the file");
+        exit(0);
+    }
+    while (fgets(buf, sizeof buf, f))
+    {
+        char *ptr = strtok(buf, " ");
+        printf("%s\n", ptr);
+    }
     return 1;
 }
 
 // B
 int lsh_mr(char **args) {
-    return 1;
+    /*FILE *file;
+    char ch, *line;
+    size_t  len = 0, read;
+    char words[1000][1000], word[20];
+    int i = 0, j, k, maxCount = 0, count;
+    file = fopen(args[1], "r");
+    if(file == NULL){
+        printf("File not Found");
+        exit(EXIT_FAILURE);
+    }
+
+    while((read = getline(&line, &len, file))!= -1){
+        for(k=0; line[k] !='\0'; k++){
+            if(line[k] != ' ' && line[k] !='\n' && )
+        }
+    }
+    return 1;*/
 }
 
 // C
