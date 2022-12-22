@@ -9,9 +9,9 @@
 #include <signal.h>
 
 #define clear() printf("\033[H\033[J");
-#define LSH_TOK_BUFSIZE 64
-#define MAXLIST 100 // max number of commands to be supported
+#define MAX_COM 100 // max length of a command
 #define MAX_FILE_NAME 100
+#define MAX_LET 1000 // max number of letters in each line of file
 
 //biult-in functions
 int lsh_fwl(char **args);
@@ -58,7 +58,6 @@ int lsh_num_builtins() {
   begin builtin function implementations
 */
 
-
 // A
 int lsh_fwl(char **args) {
     return 1;
@@ -82,8 +81,8 @@ int lsh_ncl(char **args) {
 // F
 int lsh_lc(char **args) {
     FILE *fp;
-    int count = 0;
     char c;
+    int count = 0;
     // the file should be either in current folder
     // or complete path should be provided
     char *filename = args[1];
@@ -98,26 +97,45 @@ int lsh_lc(char **args) {
     for (c = getc(fp); c != EOF; c = getc(fp))
         if (c == '\n')
             count++;
- 
+
     fclose(fp);
     printf("File %s has %d lines.\n ", filename, count);
- 
+
     return 1;
 }
 
 // G
 int lsh_ftl(char **args) {
+    FILE *fp;
+    int count = 0;
+    char line[MAX_LET];
+    char *filename = args[1];
+
+    fp = fopen(args[1], "r");
+
+    if (fp  == NULL){
+        fprintf(stderr, "could not open file %s\n", filename);
+        return 1;
+    }
+
+    while(fgets(line, MAX_LET, fp) != EOF && count++ < 10) {
+        printf("%s", line);
+    }
+
+    fclose(fp);
+
     return 1;
 }
 
 int lsh_cd(char **args) {
     if (args[1] == NULL) {
-        fprintf(stderr, "lsh: expected argument to \"cd\"\n");
-    } else {
-        if (chdir(args[1]) != 0) {
-            perror("cd error");
-        }
+        fprintf(stderr, "expected argument to \"cd\"\n");
+        return 1;
     }
+
+    if (chdir(args[1]) != 0)
+        fprintf(stderr, "cd error\n");
+
     return 1;
 }
 
@@ -190,7 +208,7 @@ int cmnd_execute(char **args) {
 void parse_space(char* line, char** arg) {
 	int i;
 
-	for (i = 0; i < MAXLIST; i++) {
+	for (i = 0; i < MAX_COM; i++) {
 		arg[i] = strsep(&line, " ");
 
 		if (arg[i] == NULL)
@@ -216,7 +234,7 @@ void signal_handler(int sig){
 // command loop
 void shell_program(void) {
     char *line;
-    char* args[MAXLIST];
+    char* args[MAX_COM];
     int status;
 
     signal(SIGINT, signal_handler);
