@@ -11,24 +11,28 @@
 #define clear() printf("\033[H\033[J");
 #define LSH_TOK_BUFSIZE 64
 #define MAXLIST 100 // max number of commands to be supported
+#define MAX_FILE_NAME 100
 
 //biult-in functions
+int lsh_lc(char **args);
 int lsh_cd(char **args);
 int lsh_help(char **args);
 int lsh_exit(char **args);
 
 // List of builtin commands
 char *builtin_str[] = {
-        "cd",
-        "help",
-        "exit"
+    "lc",
+    "cd",
+    "help",
+    "exit"
 };
 
 // List of builtin functions
 int (*builtin_func[]) (char **) = {
-        &lsh_cd,
-        &lsh_help,
-        &lsh_exit
+    &lsh_lc,
+    &lsh_cd,
+    &lsh_help,
+    &lsh_exit
 };
 
 int lsh_num_builtins() {
@@ -38,6 +42,32 @@ int lsh_num_builtins() {
 /*
   begin builtin function implementations
 */
+
+// F
+int lsh_lc(char **args) {
+    FILE *fp;
+    int count = 0;
+    char c;
+    // the file should be either in current folder
+    // or complete path should be provided
+    char *filename = args[1];
+ 
+    fp = fopen(filename, "r");
+ 
+    if (fp == NULL) {
+        fprintf(stderr, "could not open file %s\n", filename);
+        return 1;
+    }
+ 
+    for (c = getc(fp); c != EOF; c = getc(fp))
+        if (c == '\n')
+            count++;
+ 
+    fclose(fp);
+    printf("File %s has %d lines.\n ", filename, count);
+ 
+    return 1;
+}
 
 int lsh_cd(char **args) {
     if (args[1] == NULL) {
@@ -136,6 +166,7 @@ void printDir() {
 	printf("\n~%s", cwd);
 }
 
+// handle ctrl+c signal
 void signal_handler(int sig){
     printDir();
     printf("\n> ");
