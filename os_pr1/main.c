@@ -6,10 +6,10 @@
 #include <sys/types.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <signal.h>
 
 #define clear() printf("\033[H\033[J");
 #define LSH_TOK_BUFSIZE 64
-#define LSH_TOK_DELIM " \t\r\n\a"
 #define MAXLIST 100 // max number of commands to be supported
 
 //biult-in functions
@@ -115,16 +115,16 @@ int cmnd_execute(char **args) {
     return sys_launch(args);
 }
 
-// parse space str, put result in parsed
-void parseSpace(char* str, char** parsed) {
+// parse space line, put result in arg
+void parse_space(char* line, char** arg) {
 	int i;
 
 	for (i = 0; i < MAXLIST; i++) {
-		parsed[i] = strsep(&str, " ");
+		arg[i] = strsep(&line, " ");
 
-		if (parsed[i] == NULL)
+		if (arg[i] == NULL)
 			break;
-		if (strlen(parsed[i]) == 0)
+		if (strlen(arg[i]) == 0)
 			i--;
 	}
 }
@@ -136,18 +136,25 @@ void printDir() {
 	printf("\n~%s", cwd);
 }
 
+void signal_handler(int sig){
+    printDir();
+    printf("\n> ");
+}
+
 // command loop
 void shell_program(void) {
     char *line;
     char* args[MAXLIST];
     int status;
 
+    signal(SIGINT, signal_handler);
+
     do {
         printDir();
         line = readline("\n> ");
         if (line && *line)
             add_history(line);
-        parseSpace(line, args);
+        parse_space(line, args);
         status = cmnd_execute(args);
 
     } while (status);
