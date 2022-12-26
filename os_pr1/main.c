@@ -41,7 +41,7 @@ int lsh_fwl(char **args) {
         return 1;
     }
     char buf[512];
-    FILE *f = fopen(args, "r");
+    FILE *f = fopen(args[1], "r");
     if (f == NULL)
     {
         printf("Error! opening the file");
@@ -63,6 +63,32 @@ int lsh_mr(char **args) {
 
 // C
 int lsh_rs(char **args) {
+    if(args[1]== NULL){
+        fprintf(stderr, "expected argument to \"rs\"\n");
+        return 1;
+    }
+    char buf[1000];
+    char out[1000];
+    int j = 0;
+    FILE *f = fopen(args[1], "r");
+    if (f == NULL){
+        printf("Error! opening the file");
+        return 1;
+    }
+    else{
+        while (fgets(buf, sizeof buf, f)){
+            for(long unsigned int i=0; i < sizeof buf; i++){
+                if(buf[i] == '\n'){
+                    break;
+                }else if(buf[i] != ' '){
+                    out[j] = buf[i];
+                    j++;
+                }
+            }
+        }
+        printf("%s", out);
+    }
+    fclose(f);
     return 1;
 }
 
