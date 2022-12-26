@@ -36,6 +36,23 @@ int lsh_num_builtins() {
 
 // A
 int lsh_fwl(char **args) {
+    if(args[1]== NULL){
+        fprintf(stderr, "expected argument to \"fwl\"\n");
+        return 1;
+    }
+    char buf[512];
+    FILE *f = fopen(args, "r");
+    if (f == NULL)
+    {
+        printf("Error! opening the file");
+        return 1;
+    }
+    while (fgets(buf, sizeof buf, f))
+    {
+        char *ptr = strtok(buf, " ");
+        printf("%s\n", ptr);
+    }
+    fclose(f);
     return 1;
 }
 
