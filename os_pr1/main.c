@@ -177,7 +177,7 @@ int lsh_lc(char **args) {
     }
 
     FILE *fp;
-    char c;
+    char line[MAX_LET];
     int count = 0;
     char *filename = args[1];
 
@@ -188,9 +188,8 @@ int lsh_lc(char **args) {
         return 1;
     }
 
-    for (c = getc(fp); c != EOF; c = getc(fp))
-        if (c == '\n')
-            count++;
+    while(fgets(line, MAX_LET, fp) != NULL)
+        count++;
 
     fclose(fp);
 
@@ -242,14 +241,11 @@ int lsh_cd(char **args) {
 
 int lsh_help(char **args) {
     int i;
-    printf("Type program names and arguments, and hit enter.\n");
-    printf("The following are built in:\n");
+    printf("The following commands are built in:\n");
 
-    for (i = 0; i < lsh_num_builtins(); i++) {
+    for (i = 0; i < lsh_num_builtins(); i++)
         printf("  %s\n", builtin_str[i]);
-    }
 
-    printf("Use the man command for information on other programs.\n");
     return 1;
 }
 
@@ -306,8 +302,6 @@ int builtin_launch(int i,char **args) {
         return ((*builtin_func[6])(args));
     }
 
-    // cd and exit should be handled //
-
     pid = fork();
 
     if (pid < 0){
@@ -333,16 +327,13 @@ int builtin_launch(int i,char **args) {
 int cmnd_execute(char **args) {
     int i;
 
-    if (args[0] == NULL) {
+    if (args[0] == NULL)
         // an empty command was entered
         return 1;
-    }
 
-    for (i = 0; i < lsh_num_builtins(); i++) {
-        if (strcmp(args[0], builtin_str[i]) == 0) {
+    for (i = 0; i < lsh_num_builtins(); i++)
+        if (strcmp(args[0], builtin_str[i]) == 0)
             return builtin_launch(i, args);
-        }
-    }
 
     return sys_launch(args);
 }
@@ -387,6 +378,7 @@ void shell_program(void) {
         line = readline("\n> ");
         if (line && *line)
             add_history(line);
+
         parse_space(line, args);
         status = cmnd_execute(args);
 
@@ -402,11 +394,11 @@ void init_shell() {
 }
 
 int main(int argc, char **argv) {
-    // Load config files, if any.
     init_shell();
+
     // Run command loop.
     shell_program();
-    // Perform any shutdown/cleanup.
+
     return EXIT_SUCCESS;
 }
 
