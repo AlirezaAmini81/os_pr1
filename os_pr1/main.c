@@ -15,15 +15,15 @@
 
 // List of builtin commands
 char *builtin_str[] = {
-    "fwl",
-    "mr",
-    "rs",
-    "ucl",
-    "lc",
-    "ftl",
-    "cd",
-    "help",
-    "exit"
+        "fwl",
+        "mr",
+        "rs",
+        "ucl",
+        "lc",
+        "ftl",
+        "cd",
+        "help",
+        "exit"
 };
 
 int lsh_num_builtins() {
@@ -41,16 +41,23 @@ int lsh_fwl(char **args) {
         return 1;
     }
     char buf[512];
-    FILE *f = fopen(args[1], "r");
+    char *filename = args[1];
+    FILE *f = fopen(filename, "r");
     if (f == NULL)
     {
-        printf("Error! opening the file");
+        fprintf(stderr, "could not open file %s\n", filename);
         return 1;
     }
     while (fgets(buf, sizeof buf, f))
     {
-        char *ptr = strtok(buf, " ");
-        printf("%s\n", ptr);
+        for(long unsigned int i=0; i < sizeof buf; i++){
+            if(buf[i] == '\n' || buf[i] == ' ' ){
+                printf("\n");
+                break;
+            }else {
+                printf("%c", buf[i]);
+            }
+        }
     }
     fclose(f);
     return 1;
@@ -58,6 +65,46 @@ int lsh_fwl(char **args) {
 
 // B
 int lsh_mr(char **args) {
+    if(args[1]== NULL){
+        fprintf(stderr, "expected argument to \"mr\"\n");
+        return 1;
+    }
+    char ch, *line;
+    size_t len =0;
+    char words[1000][1000], word[20];
+    int i =0, j, k, maxCount =0, count;
+    char *filename = args[1];
+    FILE *f = fopen(filename, "r");
+    if (f == NULL)
+    {
+        fprintf(stderr, "could not open file %s\n", filename);
+        return 1;
+    }
+    while(getline(&line, &len, f)!= -1){
+        for(k=0; line[k] !='\0'; k++){
+            if(line[k] !=' ' &&line[k] !='\n' && line[k] !=',' && line[k] !='.'){
+                words[i][j++] = tolower(line[k]);
+            }else{
+                words[i][j] = '\0';
+                i++;
+                j=0;
+            }
+        }
+    }
+    int length = i;
+    for(i =0; i <length; i++){
+        count = 1;
+        for( j = i+1; j< length;j++){
+            if(strcmp(words[i], words[j]) == 0 && (strcmp(words[i], " ") != 0)){
+                count++;
+            }
+        }
+        if(count > maxCount){
+            maxCount = count;
+            strcpy(word, words[i]);
+        }
+    }
+    printf(" Most repeated word: %s", word);
     return 1;
 }
 
@@ -70,9 +117,10 @@ int lsh_rs(char **args) {
     char buf[1000];
     char out[1000];
     int j = 0;
-    FILE *f = fopen(args[1], "r");
+    char *filename = args[1];
+    FILE *f = fopen(filename, "r");
     if (f == NULL){
-        printf("Error! opening the file");
+        fprintf(stderr, "could not open file %s\n", filename);
         return 1;
     }
     else{
@@ -132,14 +180,14 @@ int lsh_lc(char **args) {
     char c;
     int count = 0;
     char *filename = args[1];
- 
+
     fp = fopen(filename, "r");
- 
+
     if (fp == NULL) {
         fprintf(stderr, "could not open file %s\n", filename);
         return 1;
     }
- 
+
     for (c = getc(fp); c != EOF; c = getc(fp))
         if (c == '\n')
             count++;
@@ -211,14 +259,14 @@ int lsh_help(char **args) {
 
 // List of builtin functions
 int (*builtin_func[]) (char **) = {
-    &lsh_fwl,
-    &lsh_mr,
-    &lsh_rs,
-    &lsh_ucl,
-    &lsh_lc,
-    &lsh_ftl,
-    &lsh_cd,
-    &lsh_help
+        &lsh_fwl,
+        &lsh_mr,
+        &lsh_rs,
+        &lsh_ucl,
+        &lsh_lc,
+        &lsh_ftl,
+        &lsh_cd,
+        &lsh_help
 };
 
 // lunch system command
@@ -301,23 +349,23 @@ int cmnd_execute(char **args) {
 
 // parse space line, put result in arg
 void parse_space(char* line, char** arg) {
-	int i;
+    int i;
 
-	for (i = 0; i < MAX_COM; i++) {
-		arg[i] = strsep(&line, " ");
+    for (i = 0; i < MAX_COM; i++) {
+        arg[i] = strsep(&line, " ");
 
-		if (arg[i] == NULL)
-			break;
-		if (strlen(arg[i]) == 0)
-			i--;
-	}
+        if (arg[i] == NULL)
+            break;
+        if (strlen(arg[i]) == 0)
+            i--;
+    }
 }
 
 // print current directory
 void printDir() {
-	char cwd[1024];
-	getcwd(cwd, sizeof(cwd));
-	printf("\n~%s", cwd);
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+    printf("\n~%s", cwd);
 }
 
 // handle ctrl+c signal
@@ -347,10 +395,10 @@ void shell_program(void) {
 
 // greeting shell during startup
 void init_shell() {
-	clear();
-	printf("\n\t\t\t****WELCOME TO MY SHELL****\n");
-	sleep(1);
-	clear();
+    clear();
+    printf("\n\t\t\t****WELCOME TO MY SHELL****\n");
+    sleep(1);
+    clear();
 }
 
 int main(int argc, char **argv) {
@@ -365,6 +413,5 @@ int main(int argc, char **argv) {
 
 /*
 gcc main.c -lreadline
-./a.out 
+./a.out
 */
-
