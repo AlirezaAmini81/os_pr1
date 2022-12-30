@@ -71,54 +71,46 @@ int lsh_fwl(char **args) {
 
 // B
 int lsh_mr(char **args) {
-    if (args[1] == NULL) {
+    if(args[1]== NULL){
         fprintf(stderr, "expected argument to \"mr\"\n");
         return 1;
     }
-
     char ch, *line;
     size_t len =0;
     char words[1000][1000], word[20];
     int i =0, j, k, maxCount =0, count;
     char *filename = args[1];
-
     FILE *f = fopen(filename, "r");
-
-    if (f == NULL) {
+    if (f == NULL)
+    {
         fprintf(stderr, "could not open file %s\n", filename);
         return 1;
     }
-
-    while(getline(&line, &len, f) != -1) {
-        for(k = 0; line[k] != '\0'; k++) {
-            if(line[k] != ' ' && line[k] != '\n' && line[k] != ',' && line[k] != '.') {
+    while(getline(&line, &len, f)!= -1){
+        for(k=0; line[k] !='\0'; k++){
+            if(line[k] !=' ' &&line[k] !='\n' && line[k] !=',' && line[k] !='.'){
                 words[i][j++] = tolower(line[k]);
-            } else {
+            }else{
                 words[i][j] = '\0';
                 i++;
-                j = 0;
+                j=0;
             }
         }
     }
-
     int length = i;
-
-    for(i = 0; i < length; i++) {
+    for(i =0; i <length; i++){
         count = 1;
-        for( j = i + 1; j < length; j++)
-            if(strcmp(words[i], words[j]) == 0 && (strcmp(words[i], " ") != 0))
+        for( j = i+1; j< length;j++){
+            if(strcmp(words[i], words[j]) == 0 && (strcmp(words[i], " ") != 0)){
                 count++;
-
-        if(count > maxCount) {
+            }
+        }
+        if(count > maxCount){
             maxCount = count;
             strcpy(word, words[i]);
         }
     }
-
-    fclose(f);
-
-    printf(" Most Repeated word of file %s: %s", filename, word);
-
+    printf(" Most repeated word: %s", word);
     return 1;
 }
 
