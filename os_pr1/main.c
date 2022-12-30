@@ -54,7 +54,9 @@ int lsh_fwl(char **args) {
 
     printf("First Word of Lines of file %s:\n", filename);
     while (fgets(line, MAX_LET, fp)) {
-        for(int i = 0; i < MAX_LET; i++) {
+        int i = 0;
+        for(; line[i] == ' ' && i < MAX_LET; i++);
+        for(; i < MAX_LET; i++) {
             if(line[i] == '\n' || line[i] == ' ' ) {
                 printf("\n");
                 break;
@@ -173,9 +175,12 @@ int lsh_ucl(char **args) {
     }
 
     printf("UnCommented Lines of file %s:\n", filename);
-    while(fgets(line, MAX_LET, fp))
-        if (line[0] != '#')
+    while(fgets(line, MAX_LET, fp)) {
+        int i = 0;
+        for(; line[i] == ' ' && i < MAX_LET; i++);
+        if (line[i] != '#')
             printf("%s", line);
+    }
 
     fclose(fp);
 
